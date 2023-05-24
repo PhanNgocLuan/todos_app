@@ -31,7 +31,7 @@ exports.insertTask = async (data) => {
   }
 };
 
-exports.updateTask = async (id,task_name) => {
+exports.updateTask = async (id, task_name) => {
   try {
     const task = await Task.findById(id);
     if (!task) {
@@ -55,6 +55,28 @@ exports.deleteTask = async (id) => {
     task.task_status = "Delete";
 
     await task.save();
+    return task;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+exports.searchTask = async (keyword) => {
+  try {
+    const keywordCondition =
+      keyword === undefined
+        ? {}
+        : {
+            $or: [
+              { task_name: { $regex: keyword } },
+              { task_status: { $regex: keyword } },
+              { tags: { $regex: keyword } },
+            ],
+          };
+    const task = await Task.find({ ...keywordCondition });
+    if (!task) {
+      throw new Error("Task not found");
+    }
     return task;
   } catch (error) {
     throw new Error(error.message);
